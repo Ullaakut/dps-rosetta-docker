@@ -17,5 +17,8 @@ It can be build without any extra arguments:
 `docker build .`
 
 On first run the DPS index snapshot will be downloaded and unpacked. Since those files are large 
-it's advisable to provide a fixed mountpoint for running container with `/data/` path.
+it's advisable to provide a fixed mountpoint for running container under `/data/` path.
 
+## Endpoints
+
+HTTP endpoint is exposed on port 8080
