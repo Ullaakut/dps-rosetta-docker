@@ -20,8 +20,8 @@ RUN  --mount=type=cache,target=/go/pkg/mod \
      go build -o /rosetta-dispatcher-server -ldflags "-extldflags -static" ./cmd/rosetta-dispatcher-server && \
      chmod a+x /rosetta-dispatcher-server
 
-# TODO - get it from repo
-COPY supervisord.conf /supervisord.conf
+RUN mkdir /docker
+RUN git clone https://github.com/dapperlabs/dps-rosetta-docker /docker
 
 ## Build Relic first to maximize caching
 FROM build-setup AS build-relic
@@ -92,14 +92,12 @@ RUN chmod a+x  /bin/restore-index-snapshot \
 #    /bin/rosetta-mainnet-8 \
 #    /bin/rosetta-mainnet-9
 
-COPY --from=build-setup /supervisord.conf /supervisord.conf
+COPY --from=build-setup /docker/supervisord.conf /supervisord.conf
+COPY --from=build-setup /docker/run.sh /run.sh
 
-# TODO load from repo
-COPY run.sh /run.sh
 RUN chmod a+x /run.sh
 
 
 EXPOSE 8080
-# 8005 8006 8007 8008 8009
 
 CMD ["bash", "-x", "/run.sh"]
