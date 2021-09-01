@@ -3,9 +3,10 @@ FROM golang:1.16-buster AS build-setup
 RUN apt-get update
 RUN apt-get -y install cmake zip sudo git
 
-RUN mkdir /dps
+RUN mkdir /dps /docker
 WORKDIR /dps
-RUN git clone https://github.com/m4ksio/flow-dps /dps
+RUN git clone https://github.com/m4ksio/flow-dps /dps && \
+    git clone https://github.com/dapperlabs/dps-rosetta-docker /docker
 
 RUN  --mount=type=cache,target=/go/pkg/mod \
      --mount=type=cache,target=/root/.cache/go-build  \
@@ -20,39 +21,36 @@ RUN  --mount=type=cache,target=/go/pkg/mod \
      go build -o /rosetta-dispatcher-server -ldflags "-extldflags -static" ./cmd/rosetta-dispatcher-server && \
      chmod a+x /rosetta-dispatcher-server
 
-RUN mkdir /docker
-RUN git clone https://github.com/dapperlabs/dps-rosetta-docker /docker
-
 ## Build Relic first to maximize caching
-FROM build-setup AS build-relic
+#FROM build-setup AS build-relic
+#
+#RUN mkdir /build
+#WORKDIR /build
+#
+## Copy over the crypto package
+## COPY crypto ./crypto
+#
+## Build Relic (this places build artifacts in /build/relic/build)
+#RUN cd ./crypto/ && go generate
 
-RUN mkdir /build
-WORKDIR /build
-
-# Copy over the crypto package
-# COPY crypto ./crypto
-
-# Build Relic (this places build artifacts in /build/relic/build)
-RUN cd ./crypto/ && go generate
-
-FROM build-setup AS build-mainnet3
-
-WORKDIR /dps
-RUN  --mount=type=cache,target=/go/pkg/mod \
-     --mount=type=cache,target=/root/.cache/go-build  \
-     git checkout m4ksio/mainnet-3-proxy &&  \
-     go build -o /app -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
-     chmod a+x /app
-
-
-FROM build-setup AS build-mainnet4
-
-WORKDIR /dps
-RUN  --mount=type=cache,target=/go/pkg/mod \
-     --mount=type=cache,target=/root/.cache/go-build  \
-     git checkout m4ksio/mainnet-4-proxy &&  \
-     go build -o /app -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
-     chmod a+x /app \
+#FROM build-setup AS build-mainnet3
+#
+#WORKDIR /dps
+#RUN  --mount=type=cache,target=/go/pkg/mod \
+#     --mount=type=cache,target=/root/.cache/go-build  \
+#     git checkout m4ksio/mainnet-3-proxy &&  \
+#     go build -o /app -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
+#     chmod a+x /app
+#
+#
+#FROM build-setup AS build-mainnet4
+#
+#WORKDIR /dps
+#RUN  --mount=type=cache,target=/go/pkg/mod \
+#     --mount=type=cache,target=/root/.cache/go-build  \
+#     git checkout m4ksio/mainnet-4-proxy &&  \
+#     go build -o /app -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
+#     chmod a+x /app \
 
 FROM build-setup AS build-mainnet5
 
