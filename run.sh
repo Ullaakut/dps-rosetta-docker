@@ -16,7 +16,7 @@ function mainnet_data() {
   echo "Checking $MAINNET_NAME data"
   if [ ! -d "$INDEX_DIR" ]; then
     TMP_FILE=$(mktemp)
-    wget "$DOWNLOAD_URL" -O "$TMP_FILE"
+    wget -nv "$DOWNLOAD_URL" -O "$TMP_FILE"
     DOWNLOADED_SHA256=$(sha256sum "$TMP_FILE" | cut -d' ' -f1)
 
     if [ "$DOWNLOADED_SHA256" != "$EXPECTED_SHA256" ]; then

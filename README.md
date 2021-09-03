@@ -13,7 +13,9 @@ Mainnet-5 | 12020337     | 12609236
 Dockerfile is self-contained - it downloads all code and configuration it needs from a git repository, as 
 designated by Rosetta requirements.
 
-It can be build without any extra arguments: 
+NOTE - Docker BuildKit support is required!
+
+It can be built without any extra arguments: 
 `docker build .`
 
 On first run the DPS index snapshot will be downloaded and unpacked. Since those files are large 
