@@ -61,6 +61,43 @@ RUN  --mount=type=cache,target=/go/pkg/mod \
      go build -o /app -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
      chmod a+x /app
 
+FROM build-setup AS build-mainnet6
+
+WORKDIR /dps
+RUN  --mount=type=cache,target=/go/pkg/mod \
+     --mount=type=cache,target=/root/.cache/go-build  \
+     git checkout m4ksio/mainnet-6-proxy &&  \
+     go build -o /app -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
+     chmod a+x /app
+
+FROM build-setup AS build-mainnet7
+
+WORKDIR /dps
+RUN  --mount=type=cache,target=/go/pkg/mod \
+     --mount=type=cache,target=/root/.cache/go-build  \
+     git checkout m4ksio/mainnet-7-proxy &&  \
+     go build -o /app -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
+     chmod a+x /app
+
+
+#FROM build-setup AS build-mainnet8
+#
+#WORKDIR /dps
+#RUN  --mount=type=cache,target=/go/pkg/mod \
+#     --mount=type=cache,target=/root/.cache/go-build  \
+#     git checkout m4ksio/mainnet-8-proxy &&  \
+#     go build -o /app -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
+#     chmod a+x /app \
+#
+#FROM build-setup AS build-mainnet9
+#
+#WORKDIR /dps
+#RUN  --mount=type=cache,target=/go/pkg/mod \
+#     --mount=type=cache,target=/root/.cache/go-build  \
+#     git checkout m4ksio/mainnet-9-proxy &&  \
+#     go build -o /app -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
+#     chmod a+x /app
+
 ## Add the statically linked binary to a distroless image
 FROM ubuntu:latest as production
 
@@ -76,17 +113,17 @@ COPY --from=build-setup /rosetta-dispatcher-server /bin/rosetta-dispatcher-serve
 #COPY --from=build-mainnet3 /app /bin/rosetta-mainnet-3
 #COPY --from=build-mainnet4 /app /bin/rosetta-mainnet-4
 COPY --from=build-mainnet5 /app /bin/rosetta-mainnet-5
-#COPY --from=build-mainnet6 /app /bin/rosetta-mainnet-6
-#COPY --from=build-mainnet7 /app /bin/rosetta-mainnet-7
+COPY --from=build-mainnet6 /app /bin/rosetta-mainnet-6
+COPY --from=build-mainnet7 /app /bin/rosetta-mainnet-7
 #COPY --from=build-mainnet8 /app /bin/rosetta-mainnet-8
 
 RUN chmod a+x  /bin/restore-index-snapshot \
     /bin/rosetta-dispatcher-server \
 #    /bin/rosetta-mainnet-3 \
 #    /bin/rosetta-mainnet-4 \
-    /bin/rosetta-mainnet-5
-#    /bin/rosetta-mainnet-6 \
-#    /bin/rosetta-mainnet-7 \
+    /bin/rosetta-mainnet-5 \
+    /bin/rosetta-mainnet-6 \
+    /bin/rosetta-mainnet-7
 #    /bin/rosetta-mainnet-8 \
 #    /bin/rosetta-mainnet-9
 
