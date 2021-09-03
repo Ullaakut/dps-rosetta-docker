@@ -6,7 +6,7 @@ RUN apt-get -y install cmake zip sudo git
 RUN mkdir /dps /docker
 WORKDIR /dps
 RUN git clone https://github.com/m4ksio/flow-dps /dps && \
-    git clone https://github.com/dapperlabs/dps-rosetta-docker /docker
+    git clone --branch v0.1 https://github.com/dapperlabs/dps-rosetta-docker /docker
 
 RUN  --mount=type=cache,target=/go/pkg/mod \
      --mount=type=cache,target=/root/.cache/go-build  \
