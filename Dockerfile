@@ -116,10 +116,8 @@ WORKDIR /dps
 RUN  --mount=type=cache,target=/go/pkg/mod \
      --mount=type=cache,target=/root/.cache/go-build  \
      git checkout $DPS_LIVE_BRANCH &&  \
-     go build -o /app-index -tags relic -ldflags "-extldflags -static" ./cmd/flow-dps-live && \
-     chmod a+x /app-index && \
-    go build -o /app-rosetta -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
-     chmod a+x /app-rosetta
+     go build -o /dps-live-index -tags relic -ldflags "-extldflags -static" ./cmd/flow-dps-live && \
+     go build -o /app-rosetta -ldflags "-extldflags -static" ./cmd/flow-rosetta-server
 
 
 
@@ -141,7 +139,7 @@ COPY --from=build-mainnet5 /app /bin/rosetta-mainnet-5
 COPY --from=build-mainnet6 /app /bin/rosetta-mainnet-6
 COPY --from=build-mainnet7 /app /bin/rosetta-mainnet-7
 #COPY --from=build-mainnet8 /app /bin/rosetta-mainnet-8
-COPY --from=build-live /app-index /bin/dps-live-index
+COPY --from=build-live /dps-live-index /bin/dps-live-index
 COPY --from=build-live /app-rosetta /bin/rosetta-live
 
 RUN chmod a+x  /bin/restore-index-snapshot \
