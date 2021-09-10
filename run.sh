@@ -61,6 +61,8 @@ function live_data() {
         exit 1
       fi
 
+      mkdir "$INDEX_DIR"
+
       mv "$TMP_FILE" "$ROOT_CHECKPOINT_FILE"
 
       # public root info
