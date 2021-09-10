@@ -7,7 +7,7 @@ ENV DPS_ROSETTA_DOCKER_BRANCH=v0.1
 ENV FLOW_GO_BRANCH=v0.21
 ENV RESTORE_INDEX_BRANCH=master
 ENV ROSETTA_DISPATCHER_BRANCH=m4ksio/rosetta-dispatcher-server
-ENV DPS_LIVE_BRANCH=v1.3.0
+ENV DPS_LIVE_BRANCH=tags/v1.3.0
 
 RUN mkdir /dps /docker
 WORKDIR /dps
@@ -115,7 +115,7 @@ FROM build-setup AS build-live
 WORKDIR /dps
 RUN  --mount=type=cache,target=/go/pkg/mod \
      --mount=type=cache,target=/root/.cache/go-build  \
-     git checkout v1.3.0 &&  \
+     git checkout $DPS_LIVE_BRANCH &&  \
      go build -o /app-index -ldflags "-extldflags -static" ./cmd/flow-dps-live && \
      chmod a+x /app-index && \
     go build -o /app-rosetta -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
