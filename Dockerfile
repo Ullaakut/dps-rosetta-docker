@@ -3,21 +3,33 @@ FROM golang:1.16-buster AS build-setup
 RUN apt-get update
 RUN apt-get -y install cmake zip sudo git
 
+ENV DPS_ROSETTA_DOCKER_BRANCH=v0.1
+ENV FLOW_GO_BRANCH=v0.21
+ENV RESTORE_INDEX_BRANCH=master
+ENV ROSETTA_DISPATCHER_BRANCH=m4ksio/rosetta-dispatcher-server
+ENV DPS_LIVE_BRANCH=v1.3.0
+
 RUN mkdir /dps /docker
 WORKDIR /dps
-RUN git clone https://github.com/m4ksio/flow-dps /dps && \
-    git clone --branch v0.1 https://github.com/dapperlabs/dps-rosetta-docker /docker
+
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build  \
+    git clone https://github.com/m4ksio/flow-dps /dps && \
+    git clone --branch $DPS_ROSETTA_DOCKER_BRANCH https://github.com/dapperlabs/dps-rosetta-docker /dps/flow-go \
+    git clone --branch v0.1 https://github.com/onflow/flow /docker \
+    cd /dps/flow-go && make crypto/relic/build #prebuild crypto dependency
+
 
 RUN  --mount=type=cache,target=/go/pkg/mod \
      --mount=type=cache,target=/root/.cache/go-build  \
-     git checkout master &&  \
+     git checkout $RESTORE_INDEX_BRANCH &&  \
      go build -o /restore-index-snapshot -ldflags "-extldflags -static" ./cmd/restore-index-snapshot && \
      chmod a+x /restore-index-snapshot
 
 # TODO once merged dispatcher should be on the same branch
 RUN  --mount=type=cache,target=/go/pkg/mod \
      --mount=type=cache,target=/root/.cache/go-build  \
-     git checkout m4ksio/rosetta-dispatcher-server &&  \
+     git checkout $ROSETTA_DISPATCHER_BRANCH &&  \
      go build -o /rosetta-dispatcher-server -ldflags "-extldflags -static" ./cmd/rosetta-dispatcher-server && \
      chmod a+x /rosetta-dispatcher-server
 
@@ -98,6 +110,19 @@ RUN  --mount=type=cache,target=/go/pkg/mod \
 #     go build -o /app -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
 #     chmod a+x /app
 
+FROM build-setup AS build-live
+
+WORKDIR /dps
+RUN  --mount=type=cache,target=/go/pkg/mod \
+     --mount=type=cache,target=/root/.cache/go-build  \
+     git checkout v1.3.0 &&  \
+     go build -o /app-index -ldflags "-extldflags -static" ./cmd/flow-dps-live && \
+     chmod a+x /app-index && \
+    go build -o /app-rosetta -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
+     chmod a+x /app-rosetta
+
+
+
 ## Add the statically linked binary to a distroless image
 FROM ubuntu:latest as production
 
@@ -116,6 +141,8 @@ COPY --from=build-mainnet5 /app /bin/rosetta-mainnet-5
 COPY --from=build-mainnet6 /app /bin/rosetta-mainnet-6
 COPY --from=build-mainnet7 /app /bin/rosetta-mainnet-7
 #COPY --from=build-mainnet8 /app /bin/rosetta-mainnet-8
+COPY --from=build-live /app-index /bin/dps-live-index
+COPY --from=build-live /app-rosetta /bin/rosetta-live
 
 RUN chmod a+x  /bin/restore-index-snapshot \
     /bin/rosetta-dispatcher-server \
@@ -123,9 +150,11 @@ RUN chmod a+x  /bin/restore-index-snapshot \
 #    /bin/rosetta-mainnet-4 \
     /bin/rosetta-mainnet-5 \
     /bin/rosetta-mainnet-6 \
-    /bin/rosetta-mainnet-7
+    /bin/rosetta-mainnet-7 \
 #    /bin/rosetta-mainnet-8 \
 #    /bin/rosetta-mainnet-9
+    /bin/dps-live-index \
+    /bin/rosetta-live 
 
 COPY --from=build-setup /docker/supervisord.conf /supervisord.conf
 COPY --from=build-setup /docker/run.sh /run.sh
