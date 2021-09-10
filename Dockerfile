@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build  \
     git clone https://github.com/m4ksio/flow-dps /dps && \
     git clone --branch $DPS_ROSETTA_DOCKER_BRANCH https://github.com/dapperlabs/dps-rosetta-docker /docker && \
-    git clone --branch $FLOW_GO_BRANCH https://github.com/onflow/flow /dps/flow-go && \
+    git clone --branch $FLOW_GO_BRANCH https://github.com/onflow/flow-go /dps/flow-go && \
     make -C /dps/flow-go crypto/relic/build #prebuild crypto dependency
 
 
