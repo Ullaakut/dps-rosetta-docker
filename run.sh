@@ -41,7 +41,7 @@ function live_data() {
 
   INDEX_DIR="$DATA_DIR/live"
   ROOT_CHECKPOINT_FILE="$INDEX_DIR/root.checkpoint"
-  PUBLIC_ROOT_INFO_DIR="$INDEX_DIR/public-root-information"
+  PUBLIC_ROOT_INFO_DIR="$INDEX_DIR/bootstrap/public-root-information"
   NODE_INFOS_FILE="$PUBLIC_ROOT_INFO_DIR/node-infos.pub.json"
   ROOT_PROTOCOL_STATE_SNAPSHOT_FILE="$PUBLIC_ROOT_INFO_DIR/root-protocol-state-snapshot.json"
 
