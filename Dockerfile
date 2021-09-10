@@ -116,7 +116,7 @@ WORKDIR /dps
 RUN  --mount=type=cache,target=/go/pkg/mod \
      --mount=type=cache,target=/root/.cache/go-build  \
      git checkout $DPS_LIVE_BRANCH &&  \
-     go build -o /app-index -ldflags "-extldflags -static" ./cmd/flow-dps-live && \
+     go build -o /app-index -tags relic -ldflags "-extldflags -static" ./cmd/flow-dps-live && \
      chmod a+x /app-index && \
     go build -o /app-rosetta -ldflags "-extldflags -static" ./cmd/flow-rosetta-server && \
      chmod a+x /app-rosetta
