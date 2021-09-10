@@ -66,7 +66,7 @@ function live_data() {
       mv "$TMP_FILE" "$ROOT_CHECKPOINT_FILE"
 
       # public root info
-      mkdir "$PUBLIC_ROOT_INFO_DIR"
+      mkdir -p "$PUBLIC_ROOT_INFO_DIR"
 
       wget -nv "$NODE_INFOS_DOWNLOAD_URL" -O "$NODE_INFOS_FILE"
       wget -nv "$ROOT_PROTOCOL_STATE_SNAPSHOT_DOWNLOAD_URL" -O "$ROOT_PROTOCOL_STATE_SNAPSHOT_FILE"
